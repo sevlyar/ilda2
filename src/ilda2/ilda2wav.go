@@ -101,8 +101,8 @@ func convertFrame(w io.Writer, f *ilda.Table, chans []chanDescr, repeat int) {
 					v = int16(f.Points[i].Status.GetColor())
 				}
 
-				p[0] = byte(v >> 8)
-				p[1] = byte(v)
+				p[0] = byte(v)
+				p[1] = byte(v >> 8)
 				w.Write(p)
 			}
 		}

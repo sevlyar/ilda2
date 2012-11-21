@@ -138,7 +138,7 @@ func (descr *chanDescr) parse(s string) bool {
 		return false
 	case 1:
 		descr.mult = 1
-	case 2:
+	default:
 		mul, err := strconv.ParseFloat(s[:len(s)-1], 32)
 		if err != nil {
 			return false
