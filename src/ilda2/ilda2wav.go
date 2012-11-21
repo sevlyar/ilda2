@@ -44,13 +44,13 @@ func ilda2wav(opt *FileConvOpt, targetDir string, status chan<- *opStatus) {
 		return
 	}
 
-	var stream bytes.Buffer
+	stream := bytes.NewBuffer(make([]byte, 1024*1024))
 
 	l := len(ani.Frames)
 	for i, frame := range ani.Frames {
 		repeat := opt.Pps / (opt.Fps * len(frame.Points))
 
-		convertFrame(&stream, frame, opt.chans, repeat)
+		convertFrame(stream, frame, opt.chans, repeat)
 		status <- newStatusPercent(100 * (i + 1) / l)
 	}
 
@@ -62,7 +62,7 @@ func ilda2wav(opt *FileConvOpt, targetDir string, status chan<- *opStatus) {
 	}
 	defer wav.Close()
 
-	err = WriteWav(wav, &stream, stream.Len(), len(opt.chans), opt.Pps)
+	err = WriteWav(wav, stream, stream.Len(), len(opt.chans), opt.Pps)
 	if err != nil {
 		sendError(status, err)
 		return
@@ -76,11 +76,10 @@ func wavFileName(dir, file string) string {
 }
 
 func convertFrame(w io.Writer, f *ilda.Table, chans []chanDescr, repeat int) {
-	p := make([]byte, 2)
 
-	// TODO: cache sequence and copy
-	for repeat > 0 {
-		repeat--
+	if repeat > 0 {
+		p := make([]byte, 2*len(f.Points)*len(chans))
+		ind := 0
 
 		for i := 0; i < len(f.Points); i++ {
 			for j := 0; j < len(chans); j++ {
@@ -101,10 +100,16 @@ func convertFrame(w io.Writer, f *ilda.Table, chans []chanDescr, repeat int) {
 					v = int16(f.Points[i].Status.GetColor())
 				}
 
-				p[0] = byte(v)
-				p[1] = byte(v >> 8)
-				w.Write(p)
+				p[ind] = byte(v)
+				ind++
+				p[ind] = byte(v >> 8)
+				ind++
 			}
+		}
+
+		for repeat > 0 {
+			repeat--
+			w.Write(p)
 		}
 	}
 }
