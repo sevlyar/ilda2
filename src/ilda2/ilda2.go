@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -17,10 +18,7 @@ func main() {
 		fail(CONFIG_ERROR, "Unable read options:", err)
 	}
 
-	// clear target dir
-	if err = os.RemoveAll(opt.TargetDir); err != nil {
-		fail(CONVERT_ERROR, "Unable remove all from target dir:", err)
-	}
+	clearDir(opt.TargetDir)
 
 	// convert files
 	for i, _ := range opt.Files {
@@ -33,6 +31,23 @@ func main() {
 			status(&opt.Files[i], stat.percent)
 		}
 		fmt.Println()
+	}
+}
+
+func clearDir(path string) {
+	const msg = "Unable remove all from target dir:"
+	dir, err := os.Open(path)
+	if err != nil {
+		fail(CONVERT_ERROR, msg, err)
+	}
+	children, err := dir.Readdirnames(-1)
+	if err != nil {
+		fail(CONVERT_ERROR, msg, err)
+	}
+	for _, child := range children {
+		if err = os.RemoveAll(filepath.Join(path, child)); err != nil {
+			fail(CONVERT_ERROR, msg, err)
+		}
 	}
 }
 
