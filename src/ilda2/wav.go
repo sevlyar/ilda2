@@ -27,7 +27,7 @@ func WriteWav(w io.Writer, s io.Reader, length, chans, sps int) (err error) {
 	write_u32(w, fmt__MARK)
 	write_u32(w, 16)
 
-	write_u16(w, 0) // format PCM
+	write_u16(w, 1) // format PCM
 	write_u16(w, uint16(chans))
 
 	write_u32(w, uint32(sps))
