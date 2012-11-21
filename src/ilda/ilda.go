@@ -154,10 +154,10 @@ func (p *Point) Read(r io.Reader) (err error) {
 	if _, err = r.Read(pointBuf); err != nil {
 		return
 	}
-	p.X = int16(pointBuf[0] | pointBuf[1]<<8)
-	p.Y = int16(pointBuf[2] | pointBuf[3]<<8)
-	p.Z = int16(pointBuf[4] | pointBuf[5]<<8)
-	p.Status = Status(pointBuf[6] | pointBuf[7]<<8)
+	p.X = int16(pointBuf[0])<<8 | int16(pointBuf[1])
+	p.Y = int16(pointBuf[2])<<8 | int16(pointBuf[3])
+	p.Z = int16(pointBuf[4])<<8 | int16(pointBuf[5])
+	p.Status = Status(int16(pointBuf[6])<<8 | int16(pointBuf[7]))
 
 	return
 }
