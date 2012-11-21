@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime/pprof"
 	"strings"
 )
 
@@ -13,6 +14,9 @@ const (
 )
 
 func main() {
+	profile()
+	defer pprof.StopCPUProfile()
+
 	opt, err := readOpts("ilda2.json")
 	if err != nil {
 		fail(CONFIG_ERROR, "Unable read options:", err)
@@ -83,4 +87,10 @@ func check(err error, code int) {
 func fail(code int, a ...interface{}) {
 	fmt.Fprintln(os.Stderr, a...)
 	os.Exit(code)
+}
+
+func profile() {
+	file, err := os.Create(".prof")
+	check(err, 5)
+	pprof.StartCPUProfile(file)
 }
