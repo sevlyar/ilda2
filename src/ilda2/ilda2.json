@@ -1,0 +1,27 @@
+{
+    "target-dir": "E:",
+    "gen-list": true,
+
+    "def-opts": {
+        "fps":   15,
+        "pps":   20000,
+        "order": "Y|-1X|B|C",
+        "time":  "20"
+    },
+
+    "files": [
+        {
+            "name": "doc.go",
+            "fps": 15,
+            "pps": 12000,
+            "order": "Y|X|B|Z",
+            "time": "100"
+        },
+        {
+            "name": "ilda2.go",
+            "fps": 15,
+            "pps": 12000,
+            "time": "10"
+        }
+    ]
+}
