@@ -148,19 +148,17 @@ type Point struct {
 	Status Status // Цвет и дополнительная информация
 }
 
+var pointBuf = make([]byte, 8)
+
 func (p *Point) Read(r io.Reader) (err error) {
-	if err = binary.Read(r, order, &p.X); err != nil {
+	if _, err = r.Read(pointBuf); err != nil {
 		return
 	}
-	if err = binary.Read(r, order, &p.Y); err != nil {
-		return
-	}
-	if err = binary.Read(r, order, &p.Z); err != nil {
-		return
-	}
-	if err = binary.Read(r, order, &p.Status); err != nil {
-		return
-	}
+	p.X = int16(pointBuf[0] | pointBuf[1]<<8)
+	p.Y = int16(pointBuf[2] | pointBuf[3]<<8)
+	p.Z = int16(pointBuf[4] | pointBuf[5]<<8)
+	p.Status = Status(pointBuf[6] | pointBuf[7]<<8)
+
 	return
 }
 
