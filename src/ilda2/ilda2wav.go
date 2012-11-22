@@ -45,12 +45,14 @@ func ilda2wav(opt *FileConvOpt, targetDir string, status chan<- *opStatus) {
 	}
 
 	stream := bytes.NewBuffer(make([]byte, 1024*1024))
+	stream.Reset()
 
 	l := len(ani.Frames)
 	for i, frame := range ani.Frames {
 		repeat := opt.Pps / (opt.Fps * len(frame.Points))
-
-		convertFrame(stream, frame, opt.chans, repeat)
+		if repeat > 0 {
+			convertFrame(stream, frame, opt.chans, repeat)
+		}
 		status <- newStatusPercent(100 * (i + 1) / l)
 	}
 
