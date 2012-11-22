@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/base32"
 	"fmt"
+	"hash/crc32"
 	"os"
 	"path/filepath"
 	"runtime/pprof"
@@ -27,7 +29,7 @@ func main() {
 
 	// convert files
 	for i, _ := range opt.Files {
-		path := wavFileName(opt.TargetDir, opt.Files[i].Name)
+		path := wavFileName(opt.TargetDir, &opt.Files[i])
 		for stat := range ilda2wavGo(&opt.Files[i], path) {
 			if stat.err != nil {
 				fmt.Println()
@@ -39,6 +41,11 @@ func main() {
 		fmt.Println()
 	}
 
+	if !opt.GenList {
+		return
+	}
+
+	// playlist generation
 	listPath := filepath.Join(opt.TargetDir, "list.lst")
 	f, err := os.OpenFile(listPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
@@ -47,14 +54,32 @@ func main() {
 	defer f.Close()
 
 	for i, _ := range opt.Files {
-		fmt.Fprintln(f, opt.Files[i].Name+".wav", opt.Files[i].Time)
+		fmt.Fprintln(f, genWavName(&opt.Files[i]), opt.Files[i].Time)
 	}
 
 	fmt.Fprintln(f, "#")
 }
 
-func wavFileName(dir, file string) string {
-	return filepath.Join(dir, file) + ".wav"
+func genWavName(opt *FileConvOpt) string {
+	name := opt.Name
+	pInd := strings.LastIndex(name, ".")
+	if pInd >= 0 {
+		name = name[:pInd]
+	}
+
+	buf := []byte(opt.Name)
+	buf = append(buf, []byte(opt.Order)...)
+	n := uint16(opt.Pps + opt.Fps)
+	buf = append(buf, []byte{byte(n >> 8), byte(n)}...)
+	crc := crc32.ChecksumIEEE(buf)
+	crc16 := uint16(crc) ^ uint16(crc>>16)
+	hash := base32.StdEncoding.EncodeToString([]byte{byte(crc16 >> 8), byte(crc16)})
+	hash = hash[:4]
+	return opt.Name[:4] + hash + ".wav"
+}
+
+func wavFileName(dir string, opt *FileConvOpt) string {
+	return filepath.Join(dir, genWavName(opt))
 }
 
 func clearDir(path string) {
