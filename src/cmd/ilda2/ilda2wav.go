@@ -2,11 +2,14 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"ilda"
 	"io"
 	"math"
 	"os"
 )
+
+var errUnableConvertFrame = errors.New("unable convert frame (low pps/fps)")
 
 type opStatus struct {
 	err     error // operation error
@@ -51,9 +54,11 @@ func ilda2wav(opt *FileConvOpt, targetFile string, status chan<- *opStatus) {
 	l := len(ani.Frames)
 	for i, frame := range ani.Frames {
 		repeat := opt.Pps / (opt.Fps * len(frame.Points))
-		if repeat > 0 {
-			convertFrame(stream, frame, opt.chans, repeat)
+		if repeat < 1 {
+			sendError(status, errUnableConvertFrame)
+			return
 		}
+		convertFrame(stream, frame, opt.chans, repeat)
 		status <- newStatusPercent(100 * (i + 1) / l)
 	}
 
