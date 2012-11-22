@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base32"
+	"flag"
 	"fmt"
 	"hash/crc32"
 	"os"
@@ -16,9 +17,19 @@ const (
 	LIST_ERROR    = 3
 )
 
+var (
+	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+)
+
 func main() {
-	profile()
-	defer pprof.StopCPUProfile()
+
+	flag.Parse()
+	if *cpuprofile != "" {
+		file, err := os.Create(*cpuprofile)
+		check(err, 5)
+		pprof.StartCPUProfile(file)
+		defer pprof.StopCPUProfile()
+	}
 
 	opt, err := readOpts("ilda2.json")
 	if err != nil {
@@ -131,10 +142,4 @@ func check(err error, code int) {
 func fail(code int, a ...interface{}) {
 	fmt.Fprintln(os.Stderr, a...)
 	os.Exit(code)
-}
-
-func profile() {
-	file, err := os.Create(".prof")
-	check(err, 5)
-	pprof.StartCPUProfile(file)
 }
