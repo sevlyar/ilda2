@@ -11,6 +11,7 @@ import (
 const (
 	CONFIG_ERROR  = 1
 	CONVERT_ERROR = 2
+	LIST_ERROR    = 3
 )
 
 func main() {
@@ -37,6 +38,19 @@ func main() {
 		}
 		fmt.Println()
 	}
+
+	listPath := filepath.Join(opt.TargetDir, "list.lst")
+	f, err := os.OpenFile(listPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		fail(LIST_ERROR, err)
+	}
+	defer f.Close()
+
+	for i, _ := range opt.Files {
+		fmt.Fprintln(f, opt.Files[i].Name+".wav", opt.Files[i].Time)
+	}
+
+	fmt.Fprintln(f, "#")
 }
 
 func wavFileName(dir, file string) string {
