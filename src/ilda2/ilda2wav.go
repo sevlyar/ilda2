@@ -6,7 +6,6 @@ import (
 	"io"
 	"math"
 	"os"
-	"path/filepath"
 )
 
 type opStatus struct {
@@ -31,7 +30,7 @@ func ilda2wavGo(opt *FileConvOpt, targetDir string) <-chan *opStatus {
 
 var gbuffer = make([]byte, 10*1024*1024)
 
-func ilda2wav(opt *FileConvOpt, targetDir string, status chan<- *opStatus) {
+func ilda2wav(opt *FileConvOpt, targetFile string, status chan<- *opStatus) {
 
 	file, err := os.OpenFile(opt.Name, os.O_RDONLY, 0644)
 	if err != nil {
@@ -58,8 +57,7 @@ func ilda2wav(opt *FileConvOpt, targetDir string, status chan<- *opStatus) {
 		status <- newStatusPercent(100 * (i + 1) / l)
 	}
 
-	wav, err := os.OpenFile(wavFileName(targetDir, opt.Name),
-		os.O_CREATE|os.O_WRONLY, 0644)
+	wav, err := os.OpenFile(targetFile, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		sendError(status, err)
 		return
@@ -73,10 +71,6 @@ func ilda2wav(opt *FileConvOpt, targetDir string, status chan<- *opStatus) {
 	}
 
 	close(status)
-}
-
-func wavFileName(dir, file string) string {
-	return filepath.Join(dir, file) + ".wav"
 }
 
 func convertFrame(w io.Writer, f *ilda.Table, chans []chanDescr, repeat int) {

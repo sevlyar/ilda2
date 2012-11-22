@@ -26,7 +26,8 @@ func main() {
 
 	// convert files
 	for i, _ := range opt.Files {
-		for stat := range ilda2wavGo(&opt.Files[i], opt.TargetDir) {
+		path := wavFileName(opt.TargetDir, opt.Files[i].Name)
+		for stat := range ilda2wavGo(&opt.Files[i], path) {
 			if stat.err != nil {
 				fmt.Println()
 				fail(CONVERT_ERROR, "Unable convert file",
@@ -36,6 +37,10 @@ func main() {
 		}
 		fmt.Println()
 	}
+}
+
+func wavFileName(dir, file string) string {
+	return filepath.Join(dir, file) + ".wav"
 }
 
 func clearDir(path string) {
