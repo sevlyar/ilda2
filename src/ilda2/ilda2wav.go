@@ -29,6 +29,8 @@ func ilda2wavGo(opt *FileConvOpt, targetDir string) <-chan *opStatus {
 	return status
 }
 
+var gbuffer = make([]byte, 10*1024*1024)
+
 func ilda2wav(opt *FileConvOpt, targetDir string, status chan<- *opStatus) {
 
 	file, err := os.OpenFile(opt.Name, os.O_RDONLY, 0644)
@@ -44,7 +46,7 @@ func ilda2wav(opt *FileConvOpt, targetDir string, status chan<- *opStatus) {
 		return
 	}
 
-	stream := bytes.NewBuffer(make([]byte, 1024*1024))
+	stream := bytes.NewBuffer(gbuffer)
 	stream.Reset()
 
 	l := len(ani.Frames)
