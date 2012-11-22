@@ -25,7 +25,7 @@ func readOpts(path string) (opt *ConvOpt, err error) {
 
 	// set defaults
 	opt = new(ConvOpt)
-	opt.Default = FileConvOpt{"", 15, 20000, "Y|-X|B|C|", nil, "*"}
+	opt.Default = FileConvOpt{"", 15, 20000, "Y|-1X|B|C", nil, "*"}
 
 	// read config
 	decoder := json.NewDecoder(file)

@@ -1,0 +1,26 @@
+{
+    "target-dir": "E:",
+    "gen-list": true,
+
+    "def-opts": {
+        "fps":   15,
+        "pps":   20000,
+        "order": "Y|-1X|B|0",
+        "time":  "20"
+    },
+
+   "files": [
+        {
+            "name": "CanGoose.ild"
+        },
+        {
+            "name": "HIPHOP18.ILD"
+        },
+        {
+            "name": "CanadaFlag.ild"
+        },
+        {
+            "name": "ridd.ild"
+        }
+    ]
+}
